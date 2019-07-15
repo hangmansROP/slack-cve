@@ -13,9 +13,12 @@ web_client = slack.WebClient(token=slack_token)
 @rtm_client.run_on(event='message')
 def bot_mentioned(**payload):
     data = payload['data']
-    text = data['text']
-    if ('<@{}>'.format(rtm_client.slack_bot_id)) in text:
-        parse_query(text)
+    if 'text' in data.keys():
+        text = data['text']
+        channel_id = data['channel']
+        thread_ts = data['ts']
+        if ('<@{}>'.format(rtm_client.slack_bot_id)) in text:
+            parse_query(text, thread_ts, channel_id)
 
 
 @rtm_client.run_on(event='hello')
@@ -24,7 +27,7 @@ def bot_connected(**payload):
     print('Bot {} connected to RTM!'.format(rtm_client.slack_bot_id))
 
 
-def parse_query(text):
+def parse_query(text, thread, channel):
     accepted_commands = [
         'search',
         'vendor',
@@ -34,6 +37,15 @@ def parse_query(text):
 
     if command not in accepted_commands:
         print("Command {} not found!".format(command))
+        post_im('Command not found! Please try again.', channel, thread)
+
+
+def post_im(msg, channel_id, thread):
+    web_client.chat_postMessage(
+        channel=channel_id,
+        text=msg,
+        thread_ts=thread,
+        icon_emoji=':robot_face:')
 
 
 def main():
