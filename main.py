@@ -14,7 +14,6 @@ web_client = slack.WebClient(token=slack_token)
 def bot_mentioned(**payload):
     data = payload['data']
     text = data['text']
-    print('<@{}>'.format(rtm_client.slack_bot_id))
     if ('<@{}>'.format(rtm_client.slack_bot_id)) in text:
         parse_query(text)
 
@@ -26,7 +25,16 @@ def bot_connected(**payload):
 
 
 def parse_query(text):
-    print(text)
+    accepted_commands = [
+        'search',
+        'vendor',
+        'latest']
+    user_query = text.split(" ")
+    command = user_query[1]
+
+    if command not in accepted_commands:
+        print("Command {} not found!".format(command))
+
 
 def main():
     print("Starting Slackbot!")
