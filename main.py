@@ -3,6 +3,7 @@
 import os
 import time
 import slack
+import requests
 
 
 slack_token = os.environ["SLACK_API_TOKEN"]
@@ -28,16 +29,35 @@ def bot_connected(**payload):
 
 
 def parse_query(text, thread, channel):
-    accepted_commands = [
-        'search',
-        'vendor',
-        'latest']
+    accepted_commands = {
+        'search': search_cve,
+        'vendor': search_vendor,
+        'latest': get_latest
+        }
     user_query = text.split(" ")
     command = user_query[1]
 
     if command not in accepted_commands:
         print("Command {} not found!".format(command))
         post_im('Command not found! Please try again.', channel, thread)
+    else:
+        accepted_commands[command](channel, thread)
+
+
+def search_cve(channel, thread):
+    print("Searching for CVE")
+
+
+def search_vendor(channel, thread):
+    print("vendor")
+
+
+def get_latest(channel, thread):
+    latest_cve = requests.get("https://cve.circl.lu/api/last")
+    cve_list = '\n'.join(latest_cve.json()[cve]['id'] for cve in range(
+        0, len(latest_cve.json())))
+    print(cve_list)
+    post_im(cve_list, channel, thread)
 
 
 def post_im(msg, channel_id, thread):
