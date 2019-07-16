@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from pycvesearch import CVESearch
 import os
 import time
 import slack
@@ -9,6 +10,7 @@ import requests
 slack_token = os.environ["SLACK_API_TOKEN"]
 rtm_client = slack.RTMClient(token=slack_token)
 web_client = slack.WebClient(token=slack_token)
+cve = CVESearch()
 
 
 @rtm_client.run_on(event='message')
@@ -53,18 +55,19 @@ def search_vendor(channel, thread):
 
 
 def get_latest(channel, thread):
-    latest_cve = requests.get("https://cve.circl.lu/api/last")
-    cve_list = '\n'.join(latest_cve.json()[cve]['id'] for cve in range(
-        0, len(latest_cve.json())))
-    print(cve_list)
-    post_im(cve_list, channel, thread)
+    post_im("Fetching the 30 most recent CVE's...", channel, thread)
+    cve_list = cve.last()
+    latest_cve = '\n'.join([
+        "*%s*: %s" % (issue['id'], issue['references'][0]) for issue in cve_list]
+    )
+    post_im(latest_cve, channel, thread)
 
 
 def post_im(msg, channel_id, thread):
     web_client.chat_postMessage(
         channel=channel_id,
         text=msg,
-        thread_ts=thread,
+        mrkdwn=True,
         icon_emoji=':robot_face:')
 
 
