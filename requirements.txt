@@ -21,7 +21,7 @@ jaraco.itertools==4.4.2
 jaraco.logging==2.0
 jaraco.stream==2.0
 jaraco.text==3.0
-Jinja2==2.10.1
+Jinja2==2.11.3
 lxml==4.3.4
 MarkupSafe==1.1.1
 more-itertools==7.1.0
